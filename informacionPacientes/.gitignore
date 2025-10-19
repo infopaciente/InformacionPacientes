@@ -10,4 +10,4 @@ __pycache__/
 *.pyc
 
 # Ignorar archivos estáticos (si los recolectas en producción)
-/static/
+/staticfiles/
