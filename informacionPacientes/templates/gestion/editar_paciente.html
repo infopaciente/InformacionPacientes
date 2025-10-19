@@ -1,0 +1,30 @@
+{% extends "gestion/base.html" %}
+
+{% block content %}
+    
+    <div class="form-container">
+        <h2>Editar Información del Paciente</h2>
+        <p>Modifica los campos necesarios y guarda los cambios.</p>
+        
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-grid">
+                {{ form.as_p }}
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">Actualizar Paciente</button>
+                <a href="{% url 'lista_pacientes' %}" class="btn-cancel">Cancelar</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Pacientes</title>
+    <style>
+        /* * IMPORTANTE:
+         * xhtml2pdf necesita que todos los estilos estén DENTRO del HTML.
+         * No puede leer tu CSS externo de 'base.html'.
+        */
+        @page {
+            size: A4 portrait; /* Tamaño de hoja A4 en vertical */
+            @frame header_frame {
+                -pdf-frame-content: header_content;
+                left: 50pt; width: 512pt; top: 50pt; height: 40pt;
+            }
+            @frame content_frame {
+                left: 50pt; width: 512pt; top: 90pt; height: 682pt;
+            }
+            @frame footer_frame {
+                -pdf-frame-content: footer_content;
+                left: 50pt; width: 512pt; top: 772pt; height: 20pt;
+            }
+        }
+        body {
+            font-family: "Helvetica", "Arial", sans-serif;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #004a99; /* Usamos el color de tu header */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #999;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f0f0f0;
+            font-size: 10pt;
+        }
+        td {
+            font-size: 9pt;
+        }
+        .header {
+            font-size: 10pt;
+        }
+        .footer {
+            text-align: right;
+            font-size: 8pt;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div id="header_content" class="header">
+        <strong>InfoPaciente - Reporte General de Pacientes</strong>
+    </div>
+
+    <div id="footer_content" class="footer">
+        Página <pdf:pagenumber /> de <pdf:pagecount />
+    </div>
+
+    <h1>Listado de Pacientes</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>NHC</th>
+                <th>Nombre</th>
+                <th>Edad</th>
+                <th>Especialidad</th>
+                <th>Estado</th>
+                <th>Fecha de Ingreso</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in pacientes_list %}
+            <tr>
+                <td>{{ p.nhc }}</td>
+                <td>{{ p.nombre }}</td>
+                <td>{{ p.edad }}</td>
+                <td>{{ p.area.nombre }}</td>
+                <td>{{ p.estado }}</td>
+                <td>{{ p.fecha_ingreso|date:"d/m/Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center;">No hay pacientes registrados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

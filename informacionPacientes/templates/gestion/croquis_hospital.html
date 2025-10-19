@@ -1,0 +1,57 @@
+{% extends "gestion/base.html" %}
+{% load static %}
+
+{% block content %}
+    
+    <style>
+        .croquis-container {
+            display: flex;
+            flex-wrap: wrap; /* Permite que las imágenes pasen a la siguiente línea */
+            gap: 15px;      /* Espacio entre las imágenes */
+            justify-content: center;
+        }
+        .croquis-item {
+            flex-basis: 400px; /* Cada imagen tendrá una base de 400px */
+            flex-grow: 1;
+            border: 1px solid #eee;
+            padding: 10px;
+            border-radius: 5px;
+            background: #fff;
+            text-align: center;
+        }
+        .croquis-item img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+    </style>
+
+    <div class="dashboard-content">
+        <h2>Croquis del Hospital</h2>
+        <p>A continuación se muestran los mapas de las instalaciones.</p>
+        
+        <div class="croquis-container">
+
+            <div class="croquis-item">
+                <p><strong>TABLEROS - PRIMER PISO</strong></p>
+                <img src="{% static 'img/croquis1.png' %}" alt="Croquis del Hospital 1">
+            </div>
+
+            <div class="croquis-item">
+                <p><strong>TABLEROS - SEGUNDO PISO</strong></p>
+                <img src="{% static 'img/croquis2.png' %}" alt="Croquis del Hospital 2">
+            </div>
+
+            <div class="croquis-item">
+                <p><strong>TABLROS - TERCER PISO</strong></p>
+                <img src="{% static 'img/croquis3.png' %}" alt="Croquis del Hospital 3">
+            </div>
+
+            <div class="croquis-item">
+                <p><strong>TABLEROS - CUARTO PISO</strong></p>
+                <img src="{% static 'img/croquis4.png' %}" alt="Croquis del Hospital 4">
+            </div>
+
+        </div>
+    </div>
+{% endblock %}

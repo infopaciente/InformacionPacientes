@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>InfoPaciente</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    
+    <style>
+        /* --- Estilos Generales --- */
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            background: #f9f9f9; 
+        }
+        * { box-sizing: border-box; } /* Asegura que el padding no afecte el ancho */
+
+        /* --- Header --- */
+        .header { 
+            background: #004a99; 
+            color: white; 
+            padding: 15px 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            flex-wrap: wrap; /* Permite que se envuelva en pantallas pequeñas */
+        }
+        .header h3 { margin: 0; }
+        .header a { color: #f0f0f0; text-decoration: none; }
+
+        /* --- Contenedor Principal --- */
+        .container { 
+            display: flex; 
+        }
+        
+        /* --- Sidebar (Menú) --- */
+        .sidebar { 
+            width: 220px; 
+            background: #fff; 
+            min-height: 90vh; 
+            padding: 20px; 
+            border-right: 1px solid #ddd;
+            flex-shrink: 0; /* Evita que el sidebar se encoja */
+        }
+        .sidebar h4 { color: #888; text-transform: uppercase; font-size: 0.8em; }
+        .sidebar ul { list-style: none; padding: 0; margin: 0; }
+        .sidebar ul li a { 
+            display: block; 
+            padding: 10px 15px; 
+            text-decoration: none; 
+            color: #333; 
+            border-radius: 5px; 
+        }
+        .sidebar ul li a:hover, .sidebar ul li a.active { background: #f0f0f0; }
+
+        /* --- Contenido Principal --- */
+        .main-content { 
+            flex-grow: 1; /* Ocupa el espacio restante */
+            padding: 20px; 
+            overflow-x: auto; /* Añade scroll si el contenido se desborda */
+        }
+        .actions-bar { 
+            display: flex; 
+            gap: 15px; 
+            margin-bottom: 20px; 
+            flex-wrap: wrap; /* Permite que los botones se envuelvan */
+        }
+        .action-btn { 
+            background: #fff; 
+            border: 1px solid #ccc; 
+            padding: 20px; 
+            border-radius: 5px; 
+            text-align: center; 
+            text-decoration: none; 
+            color: #333; 
+            flex-grow: 1; /* Crecen para ocupar espacio */
+            min-width: 150px; /* Ancho mínimo */
+        }
+        .dashboard-content { 
+            background: #fff; 
+            border: 1px solid #ddd; 
+            padding: 20px; 
+        }
+        
+        /* 2. ESTILOS PARA EL GRID DEL DASHBOARD (GRÁFICO Y LISTA) */
+        .dashboard-grid {
+            display: flex;
+            gap: 20px;
+        }
+        .chart-container {
+            flex: 2; /* Ocupa 2 partes (40%) */
+            border:1px solid #eee; 
+            padding: 10px;
+            min-width: 280px; /* Evita que se encoja demasiado */
+        }
+        .patients-container {
+            flex: 3; /* Ocupa 3 partes (60%) */
+            border:1px solid #eee; 
+            padding: 10px;
+            overflow-x: auto; /* Scroll horizontal para la tabla en móvil */
+        }
+        .patients-container table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .patients-container th, .patients-container td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        /* 4. --- NUEVOS ESTILOS PARA FORMULARIOS Y MENSAJES --- */
+        .form-container {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 25px;
+            border-radius: 5px;
+        }
+        .form-container h2 {
+            margin-top: 0;
+        }
+
+        /* Estilo para los campos del formulario (párrafos generados por form.as_p) */
+        .form-container p {
+            margin-bottom: 15px;
+        }
+        .form-container label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .form-container input[type="text"],
+        .form-container input[type="number"],
+        .form-container input[type="date"],
+        .form-container select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        
+        .form-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .btn-submit {
+            background: #004a99;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.9em;
+            display: inline-block;
+            line-height: 1.5;
+        }
+
+        .btn-secondary {
+            display: inline-block;
+            background-color: #6c757d;
+            color: white !important; /* !important para asegurar que sobreescriba el color del link */
+            padding: 8px 15px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.9em;
+            margin-bottom: 15px; /* Le da un poco de espacio abajo */
+            transition: background-color 0.2s;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        /* Estilos para mensajes de Django */
+        .messages {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 15px;
+        }
+        .messages li {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+        .messages li.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .messages li.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 3. --- MEDIA QUERY PARA RESPONSIVE --- */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column; /* Apila el menú y el contenido */
+            }
+
+            .sidebar {
+                width: 100%; /* El menú ocupa todo el ancho */
+                min-height: auto;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .header {
+                flex-direction: column; /* Apila el logo y el "cerrar sesión" */
+                gap: 10px;
+            }
+
+            .main-content {
+                padding: 10px;
+            }
+
+            .dashboard-grid {
+                flex-direction: column; /* Apila el gráfico y la lista */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h3>InfoPaciente</h3>
+        <div>
+            <span>Administrador | </span>
+            <a href="{% url 'logout' %}">Cerrar sesión</a>
+        </div>
+    </div>
+    <div class="container">
+    
+    <nav class="sidebar">
+        <ul>
+            <li><a href="{% url 'dashboard' %}" 
+                {% if request.resolver_match.url_name == 'dashboard' %}class="active"{% endif %}>
+                Dashboard
+                </a>
+            </li>
+        </ul>
+        <h4>Acciones</h4>
+        <ul>
+            <li><a href="{% url 'buscar_paciente' %}" 
+                {% if request.resolver_match.url_name == 'buscar_paciente' %}class="active"{% endif %}>
+                Buscar Paciente
+                </a>
+            </li>
+            
+            <li><a href="{% url 'registrar_paciente' %}" 
+                {% if request.resolver_match.url_name == 'registrar_paciente' %}class="active"{% endif %}>
+                Registrar Paciente
+                </a>
+            </li>
+            
+            <li><a href="{% url 'lista_pacientes' %}" 
+                {% if request.resolver_match.url_name == 'lista_pacientes' %}class="active"{% endif %}>
+                Lista de Pacientes
+                </a>
+            </li>
+
+        <li><a href="{% url 'croquis_hospital' %}" 
+            {% if request.resolver_match.url_name == 'croquis_hospital' %}class="active"{% endif %}>
+            Croquis del Hospital
+            </a>
+            </li>   
+        </ul>
+</nav>  
+        
+        <main class="main-content">
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+</body>
+</html>

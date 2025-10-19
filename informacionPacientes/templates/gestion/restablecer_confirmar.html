@@ -1,0 +1,24 @@
+{% extends "gestion/base.html" %}
+
+{% block content %}
+    
+    <div class="form-container" style="border-left: 5px solid #DC3545;">
+        <h2>Confirmar Restablecimiento de Datos</h2>
+        
+        <p>Estás a punto de **borrar permanentemente** todos los datos de los pacientes del sistema.</p>
+        <p>Actualmente hay <strong>{{ conteo_pacientes }} paciente(s)</strong> en la base de datos.</p>
+        
+        <p><strong>¿Estás seguro de que quieres continuar?</strong></p>
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-submit" style="background-color: #DC3545;">
+                    Sí, Restablecer Datos
+                </button>
+                <a href="{% url 'dashboard' %}" class="btn-cancel">Cancelar</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

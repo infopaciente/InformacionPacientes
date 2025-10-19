@@ -1,0 +1,119 @@
+{% extends "gestion/base.html" %}
+
+{% block content %}
+    
+    <h4>Acciones</h4>
+    <div class="actions-bar">
+        <a href="{% url 'exportar_json' %}" class="action-btn">Exportar JSON</a>
+        <a href="{% url 'exportar_pdf' %}" class="action-btn">Exportar PDF</a>
+        <a href="{% url 'restablecer_datos' %}" class="action-btn" style="border-color: #DC3545; color: #DC3545;">
+    Restablecer datos
+</a>
+    </div>
+
+    <div class="dashboard-content">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Dashboard</h2>
+            <p>Total de pacientes: <strong>{{ total_pacientes }}</strong></p>
+        </div>
+        <p>Resumen general del hospital</p>
+
+        <div class="dashboard-grid">
+            
+            <div class="chart-container">
+                <strong>Distribución por especialidad</strong>
+                
+                <div style="max-height: 400px; max-width: 400px; margin: auto;">
+                    <canvas id="myPieChart"></canvas>
+                </div>
+            </div>
+
+            <div class="patients-container">
+                <strong>Pacientes Recientes</strong>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>NHC</th>
+                            <th>Nombre</th>
+                            <th>Área</th>
+                            <th>Estado</th>
+                            <th>Ingreso</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in pacientes_recientes %}
+                        <tr>
+                            <td>{{ p.nhc }}</td>
+                            <td>{{ p.nombre }}</td>
+                            <td>{{ p.area.nombre }}</td>
+                            <td>{{ p.estado }}</td>
+                            <td>{{ p.fecha_ingreso|date:"d/m/y" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" style="text-align: center;">No hay pacientes registrados.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{{ chart_labels|json_script:"chart-labels-data" }}
+{{ chart_data|json_script:"chart-data-data" }}
+
+<script>
+    // Obtenemos los datos que Django nos pasó
+    const labels = JSON.parse(document.getElementById('chart-labels-data').textContent);
+    const data = JSON.parse(document.getElementById('chart-data-data').textContent);
+
+    // Obtenemos el lienzo (canvas)
+    const ctx = document.getElementById('myPieChart').getContext('2d');
+
+    // --- 1. REGISTRAMOS EL PLUGIN ---
+    // (Asegúrate de que esta línea esté antes de 'new Chart')
+    Chart.register(ChartDataLabels); 
+
+    // Creamos el gráfico
+    const myPieChart = new Chart(ctx, {
+        type: 'pie', 
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Pacientes',
+                data: data,
+                backgroundColor: [
+                    '#004a99', '#FFC107', '#198754', '#DC3545',
+                    '#0DCAF0', '#FD7E14', '#6F42C1', '#6C757D', '#0D6EFD'
+                ],
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true, 
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                
+                // --- 2. AÑADIMOS LA CONFIGURACIÓN DEL PLUGIN ---
+                datalabels: {
+                    // Esta función define qué texto mostrar
+                    formatter: (value, ctx) => {
+                        return value; // Simplemente mostramos el número (el conteo)
+                    },
+                    color: '#fff', // Color del texto (blanco)
+                    font: {
+                        weight: 'bold',
+                        size: 16 // Tamaño de fuente
+                    }
+                }
+                // --- FIN DE LA CONFIGURACIÓN ---
+            }
+        }
+    });
+</script>
+
+{% endblock %}

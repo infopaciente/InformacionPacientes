@@ -1,0 +1,19 @@
+{% extends "gestion/base.html" %}
+
+{% block content %}
+    
+    <div class="form-container">
+        <h2>Buscar Paciente</h2>
+        <p>Ingresa el NHC (N° Historia Clínica) o el nombre del paciente.</p>
+        
+        <form method="GET" action="{% url 'lista_pacientes' %}" class="form-grid">
+            
+            <label for="q">Término de búsqueda:</label>
+            <input type="text" name="q" id="q" placeholder="Buscar por NHC o Nombre..." required>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">Buscar</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}
