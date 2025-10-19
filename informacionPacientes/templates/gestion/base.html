@@ -6,60 +6,79 @@
     
     <title>InfoPaciente</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     
     <style>
         /* --- Estilos Generales --- */
         body { 
-            font-family: Arial, sans-serif; 
+            /* Fuente más moderna que Arial */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             margin: 0; 
-            background: #f9f9f9; 
+            background: #f0f4f8; /* Fondo gris azulado claro */
         }
         * { box-sizing: border-box; } /* Asegura que el padding no afecte el ancho */
 
-        /* --- Header --- */
+        /* --- Header Superior --- */
         .header { 
-            background: #004a99; 
+            background: #005a9c; /* Azul hospital principal */
             color: white; 
             padding: 15px 30px; 
             display: flex; 
             justify-content: space-between; 
             align-items: center;
-            flex-wrap: wrap; /* Permite que se envuelva en pantallas pequeñas */
+            flex-wrap: wrap; 
         }
-        .header h3 { margin: 0; }
-        .header a { color: #f0f0f0; text-decoration: none; }
+        .header h3 { margin: 0; font-weight: 600; }
+        .header a { color: #e0f0ff; text-decoration: none; }
+        .header a:hover { text-decoration: underline; }
 
         /* --- Contenedor Principal --- */
         .container { 
             display: flex; 
         }
         
-        /* --- Sidebar (Menú) --- */
+        /* --- Sidebar (Menú Lateral) --- */
         .sidebar { 
-            width: 220px; 
-            background: #fff; 
+            width: 240px; /* Un poco más ancho */
+            background: #ffffff; 
             min-height: 90vh; 
             padding: 20px; 
             border-right: 1px solid #ddd;
             flex-shrink: 0; /* Evita que el sidebar se encoja */
+            box-shadow: 2px 0 5px rgba(0,0,0,0.03);
         }
-        .sidebar h4 { color: #888; text-transform: uppercase; font-size: 0.8em; }
+        .sidebar h4 { 
+            color: #888; 
+            text-transform: uppercase; 
+            font-size: 0.8em;
+            font-weight: 700;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+            margin-top: 20px;
+        }
         .sidebar ul { list-style: none; padding: 0; margin: 0; }
         .sidebar ul li a { 
             display: block; 
-            padding: 10px 15px; 
+            padding: 12px 15px; 
             text-decoration: none; 
             color: #333; 
             border-radius: 5px; 
+            font-weight: 500;
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
-        .sidebar ul li a:hover, .sidebar ul li a.active { background: #f0f0f0; }
+        .sidebar ul li a:hover { 
+            background: #f0f4f8; /* Fondo gris claro al pasar el mouse */
+        }
+        .sidebar ul li a.active { 
+            background: #005a9c; /* Color principal azul */
+            color: white; 
+            font-weight: 600;
+        }
 
         /* --- Contenido Principal --- */
         .main-content { 
             flex-grow: 1; /* Ocupa el espacio restante */
-            padding: 20px; 
+            padding: 30px; /* Más espaciado */
             overflow-x: auto; /* Añade scroll si el contenido se desborda */
         }
         .actions-bar { 
@@ -72,34 +91,59 @@
             background: #fff; 
             border: 1px solid #ccc; 
             padding: 20px; 
-            border-radius: 5px; 
+            border-radius: 8px; /* Bordes más redondeados */
             text-align: center; 
             text-decoration: none; 
             color: #333; 
-            flex-grow: 1; /* Crecen para ocupar espacio */
-            min-width: 150px; /* Ancho mínimo */
+            flex-grow: 1;
+            flex-basis: 150px; /* Ancho base */
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        .dashboard-content { 
-            background: #fff; 
-            border: 1px solid #ddd; 
-            padding: 20px; 
+        .action-btn:hover {
+            border-color: #005a9c;
+            color: #005a9c;
+            transform: translateY(-2px); /* Efecto de levantar */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        }
+        /* Botón de Peligro */
+        .action-btn[href*="restablecer"] {
+            border-color: #d93025;
+            color: #d93025;
+        }
+        .action-btn[href*="restablecer"]:hover {
+            background-color: #d93025;
+            color: white;
         }
         
-        /* 2. ESTILOS PARA EL GRID DEL DASHBOARD (GRÁFICO Y LISTA) */
+        /* Contenedor blanco (Dashboard, formularios, etc.) */
+        .dashboard-content, .form-container { 
+            background: #fff; 
+            border: 1px solid #ddd; 
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        /* Grid del Dashboard (Gráfico y Lista) */
         .dashboard-grid {
             display: flex;
-            gap: 20px;
+            gap: 25px;
+            flex-wrap: wrap; /* Se apila en móvil */
         }
         .chart-container {
-            flex: 2; /* Ocupa 2 partes (40%) */
+            flex: 1; 
             border:1px solid #eee; 
-            padding: 10px;
-            min-width: 280px; /* Evita que se encoja demasiado */
+            padding: 20px;
+            border-radius: 8px;
+            min-width: 280px; 
         }
         .patients-container {
-            flex: 3; /* Ocupa 3 partes (60%) */
+            flex: 2; 
             border:1px solid #eee; 
-            padding: 10px;
+            padding: 20px;
+            border-radius: 8px;
             overflow-x: auto; /* Scroll horizontal para la tabla en móvil */
         }
         .patients-container table {
@@ -108,29 +152,22 @@
         }
         .patients-container th, .patients-container td {
             text-align: left;
-            padding: 8px;
-            border-bottom: 1px solid #ddd;
+            padding: 12px 10px; /* Más padding */
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .patients-container th {
+            font-size: 0.9em;
+            text-transform: uppercase;
+            color: #555;
         }
 
-        /* 4. --- NUEVOS ESTILOS PARA FORMULARIOS Y MENSAJES --- */
-        .form-container {
-            background: #fff;
-            border: 1px solid #ddd;
-            padding: 25px;
-            border-radius: 5px;
-        }
-        .form-container h2 {
-            margin-top: 0;
-        }
-
-        /* Estilo para los campos del formulario (párrafos generados por form.as_p) */
-        .form-container p {
-            margin-bottom: 15px;
-        }
+        /* --- ESTILOS PARA FORMULARIOS (Registrar, Editar) --- */
+        .form-container h2 { margin-top: 0; }
+        .form-container p { margin-bottom: 15px; }
         .form-container label {
             display: block;
             margin-bottom: 5px;
-            font-weight: bold;
+            font-weight: 600;
             font-size: 0.9em;
         }
         .form-container input[type="text"],
@@ -138,75 +175,54 @@
         .form-container input[type="date"],
         .form-container select {
             width: 100%;
-            padding: 10px;
+            padding: 12px; /* Inputs más altos */
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 1em;
+            box-sizing: border-box; /* Importante */
         }
         
-        .form-actions {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-        }
+        .form-actions { margin-top: 20px; display: flex; gap: 10px; }
         .btn-submit {
-            background: #004a99;
+            background: #005a9c; /* Azul hospital */
             color: white;
             padding: 12px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 1em;
+            font-weight: 600;
         }
         .btn-cancel {
-            background: #6c757d;
+            background: #6c757d; /* Gris */
             color: white;
             padding: 12px 20px;
             border-radius: 4px;
             text-decoration: none;
-            font-size: 0.9em;
+            font-size: 1em;
             display: inline-block;
-            line-height: 1.5;
         }
-
+        /* Botón secundario (Limpiar búsqueda) */
         .btn-secondary {
             display: inline-block;
             background-color: #6c757d;
-            color: white !important; /* !important para asegurar que sobreescriba el color del link */
+            color: white !important;
             padding: 8px 15px;
             text-decoration: none;
             border-radius: 4px;
             font-size: 0.9em;
-            margin-bottom: 15px; /* Le da un poco de espacio abajo */
+            margin-bottom: 15px; 
             transition: background-color 0.2s;
         }
-        .btn-secondary:hover {
-            background-color: #5a6268;
-        }
+        .btn-secondary:hover { background-color: #5a6268; }
         
         /* Estilos para mensajes de Django */
-        .messages {
-            list-style: none;
-            padding: 0;
-            margin-bottom: 15px;
-        }
-        .messages li {
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 5px;
-        }
-        .messages li.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .messages li.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
+        .messages { list-style: none; padding: 0; margin-bottom: 15px; }
+        .messages li { padding: 10px; border-radius: 4px; margin-bottom: 5px; }
+        .messages li.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .messages li.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
-        /* 3. --- MEDIA QUERY PARA RESPONSIVE --- */
+        /* --- MEDIA QUERY PARA RESPONSIVE (MÓVILES) --- */
         @media (max-width: 768px) {
             .container {
                 flex-direction: column; /* Apila el menú y el contenido */
@@ -217,19 +233,47 @@
                 min-height: auto;
                 border-right: none;
                 border-bottom: 1px solid #ddd;
+                display: flex;
+                flex-direction: column;
+                align-items: center; /* Centra los títulos */
             }
+            .sidebar h4 { text-align: center; }
+            .sidebar ul {
+                display: flex;
+                flex-wrap: wrap; /* Permite que los botones se reordenen */
+                justify-content: center; /* Centra los botones */
+                gap: 5px; /* Espacio entre botones */
+                width: 100%;
+            }
+            .sidebar ul li { 
+                flex-grow: 1; /* Los botones crecen para ocupar espacio */
+                text-align: center; 
+                min-width: 150px; /* Ancho mínimo por botón */
+            }
+            .sidebar ul li a { padding: 10px; }
+
 
             .header {
                 flex-direction: column; /* Apila el logo y el "cerrar sesión" */
                 gap: 10px;
+                padding: 15px;
             }
 
             .main-content {
-                padding: 10px;
+                padding: 15px; /* Menos padding en móvil */
             }
 
             .dashboard-grid {
                 flex-direction: column; /* Apila el gráfico y la lista */
+            }
+            
+            /* Apila los botones de formulario en móvil */
+            .form-actions {
+                flex-direction: column;
+            }
+            .btn-submit, .btn-cancel {
+                width: 100%;
+                margin: 5px 0;
             }
         }
     </style>
@@ -247,38 +291,38 @@
     <nav class="sidebar">
         <ul>
             <li><a href="{% url 'dashboard' %}" 
-                {% if request.resolver_match.url_name == 'dashboard' %}class="active"{% endif %}>
-                Dashboard
+                   {% if request.resolver_match.url_name == 'dashboard' %}class="active"{% endif %}>
+                   Dashboard
                 </a>
             </li>
         </ul>
         <h4>Acciones</h4>
         <ul>
             <li><a href="{% url 'buscar_paciente' %}" 
-                {% if request.resolver_match.url_name == 'buscar_paciente' %}class="active"{% endif %}>
-                Buscar Paciente
+                   {% if request.resolver_match.url_name == 'buscar_paciente' %}class="active"{% endif %}>
+                   Buscar Paciente
                 </a>
             </li>
             
             <li><a href="{% url 'registrar_paciente' %}" 
-                {% if request.resolver_match.url_name == 'registrar_paciente' %}class="active"{% endif %}>
-                Registrar Paciente
+                   {% if request.resolver_match.url_name == 'registrar_paciente' %}class="active"{% endif %}>
+                   Registrar Paciente
                 </a>
             </li>
             
             <li><a href="{% url 'lista_pacientes' %}" 
-                {% if request.resolver_match.url_name == 'lista_pacientes' %}class="active"{% endif %}>
-                Lista de Pacientes
+                   {% if request.resolver_match.url_name == 'lista_pacientes' %}class="active"{% endif %}>
+                   Lista de Pacientes
                 </a>
             </li>
-
-        <li><a href="{% url 'croquis_hospital' %}" 
-            {% if request.resolver_match.url_name == 'croquis_hospital' %}class="active"{% endif %}>
-            Croquis del Hospital
-            </a>
-            </li>   
+    
+            <li><a href="{% url 'croquis_hospital' %}" 
+                   {% if request.resolver_match.url_name == 'croquis_hospital' %}class="active"{% endif %}>
+                   Croquis del Hospital
+                </a>
+            </li> 
         </ul>
-</nav>  
+    </nav> 
         
         <main class="main-content">
             {% block content %}
