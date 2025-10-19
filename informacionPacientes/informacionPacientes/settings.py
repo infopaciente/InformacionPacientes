@@ -147,4 +147,4 @@ if DATABASE_URL:
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Esto le dice a WhiteNoise que sirva los archivos estáticos
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"

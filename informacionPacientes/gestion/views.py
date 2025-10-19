@@ -11,6 +11,8 @@ from django.http import JsonResponse, HttpResponse
 from .utils import render_to_pdf # Nuestra función
 import datetime
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 
 
 # Usamos el decorador para proteger esta vista
@@ -211,3 +213,11 @@ def editar_paciente(request, pk):
     }
     # Reutilizaremos un template, puedes crear uno nuevo si prefieres
     return render(request, 'gestion/editar_paciente.html', context)
+
+
+def logout_view(request):
+    """
+    Vista personalizada para manejar el logout con un GET request.
+    """
+    logout(request)
+    return redirect('login') # Redirige a tu página de login
