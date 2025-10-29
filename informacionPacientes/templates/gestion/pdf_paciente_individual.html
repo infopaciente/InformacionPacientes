@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ficha del Paciente - {{ paciente.nombre }} {{ paciente.apellido }}</title>
+    <style>
+        body {
+            font-family: "Helvetica", Arial, sans-serif;
+            font-size: 12px;
+            color: #333;
+        }
+        .container {
+            width: 90%;
+            margin: auto;
+        }
+        h1 {
+            text-align: center;
+            color: #444;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        h2 {
+            font-size: 16px;
+            color: #555;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 11px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .info-paciente {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .info-paciente p {
+            margin: 5px 0;
+            line-height: 1.5;
+        }
+        .info-paciente strong {
+            display: inline-block;
+            width: 150px; /* Ancho fijo para las etiquetas */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ficha de Paciente</h1>
+        
+        <div class="info-paciente">
+            <p><strong>Nombre:</strong> {{ paciente.nombre }} {{ paciente.apellido }}</p>
+            <p><strong>DNI:</strong> {{ paciente.dni }}</p>
+            <p><strong>NHC:</strong> {{ paciente.nhc }}</p>
+            <p><strong>Edad:</strong> {{ paciente.edad }} años</p>
+            <p><strong>Área:</strong> {{ paciente.area.nombre }}</p>
+            <p><strong>Doctor Asignado:</strong> {{ paciente.doctor_asignado|default:"No asignado" }}</p>
+            <p><strong>Estado:</strong> {{ paciente.get_estado_display }}</p>
+            <p><strong>Fecha Ingreso:</strong> {{ paciente.fecha_ingreso|date:"d/m/Y" }}</p>
+            <p><strong>Fecha Alta:</strong> {{ paciente.fecha_egreso|date:"d/m/Y"|default:"Pendiente" }}</p>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <h2>Diagnóstico</h2>
+            <div style="padding: 10px; border: 1px solid #eee; background: #fafafa;">
+                <p>{{ paciente.diagnostico|default:"Sin diagnóstico registrado." }}</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <h2>Historial de Visitas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Visitante</th>
+                        <th>DNI</th>
+                        <th>Fecha Ingreso</th>
+                        <th>Hora Ingreso</th>
+                        <th>Hora Salida</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if not visitas %}
+                        <tr>
+                            <td colspan="5" style="text-align: center;">No hay visitas registradas.</td>
+                        </tr>
+                    {% endif %}
+                    {% for visita in visitas %}
+                        <tr>
+                            <td>{{ visita.nombre_visitante }}</td>
+                            <td>{{ visita.dni_visitante }}</td>
+                            <td>{{ visita.hora_ingreso|date:"d/m/Y" }}</td>
+                            <td>{{ visita.hora_ingreso|time:"H:i" }}</td>
+                            <td>
+                                {% if visita.hora_salida %}
+                                    {{ visita.hora_salida|time:"H:i" }}
+                                {% else %}
+                                    Presente
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</body>
+</html>
