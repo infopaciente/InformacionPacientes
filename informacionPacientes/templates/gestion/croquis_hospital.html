@@ -1,57 +1,77 @@
-{% extends "gestion/base.html" %}
-{% load static %}
+{% extends 'base.html' %}
 
 {% block content %}
-    
-    <style>
-        .croquis-container {
-            display: flex;
-            flex-wrap: wrap; /* Permite que las imágenes pasen a la siguiente línea */
-            gap: 15px;      /* Espacio entre las imágenes */
-            justify-content: center;
-        }
-        .croquis-item {
-            flex-basis: 400px; /* Cada imagen tendrá una base de 400px */
-            flex-grow: 1;
-            border: 1px solid #eee;
-            padding: 10px;
-            border-radius: 5px;
-            background: #fff;
-            text-align: center;
-        }
-        .croquis-item img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 4px;
-        }
-    </style>
-
-    <div class="dashboard-content">
-        <h2>Croquis del Hospital</h2>
-        <p>A continuación se muestran los mapas de las instalaciones.</p>
-        
-        <div class="croquis-container">
-
-            <div class="croquis-item">
-                <p><strong>TABLEROS - PRIMER PISO</strong></p>
-                <img src="{% static 'img/croquis1.png' %}" alt="Croquis del Hospital 1">
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Croquis del Hospital</h1>
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Piso 1</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>A:</strong> Consultorio externo</li>
+                        <li class="list-group-item"><strong>B1:</strong> Admisión, historias clínicas e informes</li>
+                        <li class="list-group-item"><strong>B2:</strong> Medicina física y rehabilitación</li>
+                        <li class="list-group-item"><strong>C:</strong> Farmacia, Imagenología, Patología clínica</li>
+                        <li class="list-group-item"><strong>D:</strong> Emergencia</li>
+                        <li class="list-group-item"><strong>E1:</strong> Anatomía patológica</li>
+                        <li class="list-group-item"><strong>E2:</strong> Casa de fuerza, casa de gases y residuos sólidos</li>
+                    </ul>
+                </div>
             </div>
-
-            <div class="croquis-item">
-                <p><strong>TABLEROS - SEGUNDO PISO</strong></p>
-                <img src="{% static 'img/croquis2.png' %}" alt="Croquis del Hospital 2">
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">Piso 2</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>A:</strong> Consultorios externos</li>
+                        <li class="list-group-item"><strong>B:</strong> Cafetería, biblioteca, sala ecuménica (capilla), comfort médico</li>
+                        <li class="list-group-item"><strong>C1:</strong> Gabinetes de apoyo</li>
+                        <li class="list-group-item"><strong>C2:</strong> Centro obstétrico</li>
+                        <li class="list-group-item"><strong>D1:</strong> Centro quirúrgico</li>
+                        <li class="list-group-item"><strong>D2:</strong> Central esterilización</li>
+                        <li class="list-group-item"><strong>E:</strong> Lavandería, nutrición y dietética</li>
+                    </ul>
+                </div>
             </div>
-
-            <div class="croquis-item">
-                <p><strong>TABLROS - TERCER PISO</strong></p>
-                <img src="{% static 'img/croquis3.png' %}" alt="Croquis del Hospital 3">
-            </div>
-
-            <div class="croquis-item">
-                <p><strong>TABLEROS - CUARTO PISO</strong></p>
-                <img src="{% static 'img/croquis4.png' %}" alt="Croquis del Hospital 4">
-            </div>
-
         </div>
     </div>
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">Piso 3</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>A:</strong> Administración</li>
+                        <li class="list-group-item"><strong>B:</strong> Hospitalización pediatría</li>
+                        <li class="list-group-item"><strong>C:</strong> Hospitalización gineco - obstetricia</li>
+                        <li class="list-group-item"><strong>D:</strong> U.C.I general</li>
+                        <li class="list-group-item"><strong>E:</strong> Almacenes, talleres y mantenimiento</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0">Piso 4</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>A:</strong> Administración</li>
+                        <li class="list-group-item"><strong>B:</strong> Hospitalización cirugía</li>
+                        <li class="list-group-item"><strong>C:</strong> Hospitalización medicina</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
