@@ -14,23 +14,16 @@ urlpatterns = [
     
     path('hospital/croquis/', views.croquis_hospital, name='croquis_hospital'),
     
-    # --- NUEVA URL ---
-    # URL para ver el detalle de un paciente
+    # --- URLS DE PACIENTES ---
     path('pacientes/ver/<int:id>/', views.ver_paciente, name='ver_paciente'), 
-    
-    # --- MODIFICADO ---
-    # URL para editar (cambiamos pk por id para que coincida con views.py)
     path('pacientes/editar/<int:id>/', views.editar_paciente, name='editar_paciente'), 
-    
-    # --- NUEVA URL ---
-    # URL para eliminar un paciente
     path('pacientes/eliminar/<int:id>/', views.eliminar_paciente, name='eliminar_paciente'), 
     
+    # --- ¡NUEVA URL PARA VISITAS! ---
+    path('visitas/salida/<int:visita_id>/', views.registrar_salida_visita, name='registrar_salida_visita'),
+
     # URLs de exportación y restablecimiento
     path('exportar/json/', views.exportar_json, name='exportar_json'),
     path('exportar/pdf/', views.exportar_pdf, name='exportar_pdf'),
     path('restablecer/', views.restablecer_datos, name='restablecer_datos'),
-    
-    # La URL original 'pacientes/buscar/' (views.buscar_paciente) se elimina 
-    # porque la función 'buscar_paciente' ya no existe en nuestro nuevo 'views.py'
 ]
