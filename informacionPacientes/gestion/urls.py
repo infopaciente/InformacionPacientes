@@ -19,11 +19,15 @@ urlpatterns = [
     path('pacientes/editar/<int:id>/', views.editar_paciente, name='editar_paciente'), 
     path('pacientes/eliminar/<int:id>/', views.eliminar_paciente, name='eliminar_paciente'), 
     
-    # --- ¡NUEVA URL PARA VISITAS! ---
+    # --- URL PARA VISITAS ---
     path('visitas/salida/<int:visita_id>/', views.registrar_salida_visita, name='registrar_salida_visita'),
 
     # URLs de exportación y restablecimiento
     path('exportar/json/', views.exportar_json, name='exportar_json'),
     path('exportar/pdf/', views.exportar_pdf, name='exportar_pdf'),
+    
+    # --- ¡NUEVA URL PARA PDF INDIVIDUAL! ---
+    path('pacientes/pdf/<int:id>/', views.exportar_pdf_paciente, name='exportar_pdf_paciente'),
+    
     path('restablecer/', views.restablecer_datos, name='restablecer_datos'),
 ]
