@@ -1,30 +1,50 @@
-{% extends "gestion/base.html" %}
+{% extends 'base.html' %}
 
 {% block content %}
-    
-    <div class="form-container">
-        <h2>Editar Información del Paciente</h2>
-        <p>Modifica los campos necesarios y guarda los cambios.</p>
-        
-        {% if messages %}
-            <ul class="messages">
-                {% for message in messages %}
-                    <li class="{{ message.tags }}">{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h2 class="h5 mb-0">Editar Paciente: {{ paciente.nombre }} {{ paciente.apellido }}</h2>
+                </div>
+                <div class="card-body">
+                    <p>Modifica los campos necesarios y guarda los cambios.</p>
 
-        <form method="POST">
-            {% csrf_token %}
-            
-            <div class="form-grid">
-                {{ form.as_p }}
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        {% for field in form %}
+                            <div class="mb-3">
+                                {{ field.label_tag }} {{ field }}          {% if field.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ field.errors.as_text }}
+                                    </div>
+                                {% endif %}
+                                
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        
+                        <div class="mt-4 text-end">
+                            <a href="{% url 'lista_pacientes' %}" class="btn btn-secondary me-2">Cancelar</a>
+                            <button type="submit" class="btn btn-success">Actualizar Paciente</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            
-            <div class="form-actions">
-                <button type="submit" class="btn-submit">Actualizar Paciente</button>
-                <a href="{% url 'lista_pacientes' %}" class="btn-cancel">Cancelar</a>
-            </div>
-        </form>
+        </div>
     </div>
+</div>
 {% endblock %}
