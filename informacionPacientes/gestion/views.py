@@ -13,7 +13,12 @@ import datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import logout
 from django.shortcuts import redirect
-from django.utils import timezone # NUEVO: Necesario para la hora de salida
+from django.utils import timezone # Necesario para la hora de salida
+
+# --- ¡NUEVAS IMPORTACIONES PARA EXCEL! ---
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, Border, Side
+# --- FIN DE IMPORTACIONES DE EXCEL ---
 
 
 # Usamos el decorador para proteger esta vista
@@ -213,6 +218,75 @@ def registrar_salida_visita(request, visita_id):
     return redirect('ver_paciente', id=visita.paciente.id)
 
 
+# --- ¡NUEVA FUNCIÓN PARA EXCEL! ---
+@login_required
+def exportar_excel(request):
+    # 1. Crear el libro de trabajo y la hoja
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Lista de Pacientes"
+
+    # 2. Definir los encabezados (como pediste, solo la info básica)
+    columnas = [
+        'DNI', 
+        'NHC', 
+        'Nombre', 
+        'Apellido', 
+        'Edad', 
+        'Área', 
+        'Doctor Asignado', 
+        'Estado', 
+        'Fecha de Ingreso'
+    ]
+    
+    # Escribir los encabezados en la fila 1
+    ws.append(columnas)
+
+    # 3. Aplicar estilo a los encabezados
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="4F81BD", end_color="4F81BD", fill_type="solid")
+    header_alignment = Alignment(horizontal="center", vertical="center")
+
+    for col in ws.iter_cols(min_row=1, max_row=1, min_col=1, max_col=len(columnas)):
+        col[0].font = header_font
+        col[0].fill = header_fill
+        col[0].alignment = header_alignment
+        # Ajustar el ancho de la columna
+        ws.column_dimensions[col[0].column_letter].width = 20
+
+    # 4. Obtener los datos de los pacientes
+    pacientes = Paciente.objects.all().order_by('apellido')
+
+    # 5. Escribir los datos en las filas siguientes
+    for paciente in pacientes:
+        # Usamos 'getattr' para obtener el nombre del área de forma segura
+        area_nombre = getattr(paciente.area, 'nombre', 'Sin Área')
+        
+        ws.append([
+            paciente.dni,
+            paciente.nhc,
+            paciente.nombre,
+            paciente.apellido,
+            paciente.edad,
+            area_nombre,
+            paciente.doctor_asignado if paciente.doctor_asignado else 'No asignado',
+            paciente.get_estado_display(),
+            paciente.fecha_ingreso,
+        ])
+    
+    # 6. Crear la respuesta HTTP
+    # Definimos el tipo de contenido
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    # Definimos el nombre del archivo
+    filename = f"reporte_pacientes_{datetime.date.today().strftime('%Y-%m-%d')}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+    # 7. Guardar el libro de trabajo en la respuesta
+    wb.save(response)
+
+    return response
+
+
 # EXPORTAR DATOS A JSON
 @login_required
 def exportar_json(request):
@@ -241,7 +315,7 @@ def exportar_pdf(request):
     if pdf:
         filename = f"reporte_pacientes_{datetime.date.today().strftime('%Y-%m-%d')}.pdf"
         response = HttpResponse(pdf, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        response['Content-Dísposition'] = f'attachment; filename="{filename}"'
         return response
     return HttpResponse("Error al generar el PDF.", status=500)
 
@@ -267,7 +341,7 @@ def exportar_pdf_paciente(request, id):
         # 5. Creamos un nombre de archivo dinámico
         filename = f"ficha_paciente_{paciente.dni}_{paciente.apellido}.pdf"
         response = HttpResponse(pdf, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        response['Content-Dísposition'] = f'attachment; filename="{filename}"'
         return response
     
     return HttpResponse("Error al generar el PDF.", status=500)
