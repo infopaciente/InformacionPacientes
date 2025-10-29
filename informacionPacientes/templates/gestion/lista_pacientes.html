@@ -1,10 +1,9 @@
 {% extends 'base.html' %}
-
-{% block content %}
+{% load static %} {% block content %}
 <div class="container mt-5">
     <h1 class="text-center mb-4">Lista de Pacientes</h1>
 
-    <form method="GET" action="{{ url_for('gestion.buscar_paciente_dni') }}" class="mb-4">
+    <form method="GET" action="{% url 'buscar_paciente_dni' %}" class="mb-4">
         <div class="input-group">
             <input type="text" class="form-control" name="dni" placeholder="Buscar paciente por DNI..." required>
             <button class="btn btn-primary" type="submit">Buscar</button>
@@ -31,15 +30,15 @@
                         <td>{{ paciente.nombre }}</td>
                         <td>{{ paciente.apellido }}</td>
                         <td>{{ paciente.edad }}</td>
-                        <td>{{ paciente.doctor_asignado if paciente.doctor_asignado else 'No asignado' }}</td>
+                        <td>{{ paciente.doctor_asignado|default:"No asignado" }}</td>
                         <td class="text-center">
-                            <a href="{{ url_for('gestion.ver_paciente', id=paciente.id) }}" class="btn btn-info btn-sm" title="Ver Detalles">
+                            <a href="{% url 'ver_paciente' paciente.id %}" class="btn btn-info btn-sm" title="Ver Detalles">
                                 <i class="fas fa-eye"></i> Ver
                             </a>
-                            <a href="{{ url_for('gestion.editar_paciente', id=paciente.id) }}" class="btn btn-warning btn-sm" title="Editar">
+                            <a href="{% url 'editar_paciente' paciente.id %}" class="btn btn-warning btn-sm" title="Editar">
                                 <i class="fas fa-edit"></i> Editar
                             </a>
-                            <a href="{{ url_for('gestion.eliminar_paciente', id=paciente.id) }}" class="btn btn-danger btn-sm" title="Eliminar" onclick="return confirm('¿Estás seguro de que deseas eliminar a este paciente?');">
+                            <a href="{% url 'eliminar_paciente' paciente.id %}" class="btn btn-danger btn-sm" title="Eliminar" onclick="return confirm('¿Estás seguro de que deseas eliminar a este paciente?');">
                                 <i class="fas fa-trash-alt"></i> Eliminar
                             </a>
                         </td>
@@ -54,6 +53,6 @@
         </table>
     </div>
 
-    <a href="{{ url_for('gestion.dashboard') }}" class="btn btn-secondary mt-3">Volver al Dashboard</a>
+    <a href="{% url 'dashboard' %}" class="btn btn-secondary mt-3">Volver al Dashboard</a>
 </div>
 {% endblock %}
