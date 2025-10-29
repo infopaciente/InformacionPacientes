@@ -1,11 +1,11 @@
 # gestion/views.py
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required # Importamos el decorador
-from .models import Paciente
+from .models import Paciente, Visita # MODIFICADO: Importamos Visita
 from django.db.models import Count
 from django.shortcuts import render, redirect
 from django.contrib import messages # Para mostrar mensajes de éxito
-from .forms import PacienteForm
+from .forms import PacienteForm, VisitaForm # MODIFICADO: Importamos VisitaForm
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 from .utils import render_to_pdf # Nuestra función
@@ -13,6 +13,7 @@ import datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import logout
 from django.shortcuts import redirect
+from django.utils import timezone # NUEVO: Necesario para la hora de salida
 
 
 # Usamos el decorador para proteger esta vista
@@ -115,19 +116,38 @@ def croquis_hospital(request):
     return render(request, 'gestion/croquis_hospital.html')
 
 
-# --- ¡NUEVA FUNCIÓN! ---
-# VER PACIENTE
+# --- ¡FUNCIÓN MODIFICADA! ---
+# VER PACIENTE (Ahora también maneja las visitas)
 @login_required
 def ver_paciente(request, id):
     paciente = get_object_or_404(Paciente, id=id)
     
-    # Aquí, más adelante, agregaremos la lógica para el historial de visitas
-    # Por ahora, solo mostramos la información del paciente
+    # --- Lógica para registrar una NUEVA VISITA (POST) ---
+    if request.method == 'POST':
+        visita_form = VisitaForm(request.POST)
+        if visita_form.is_valid():
+            nueva_visita = visita_form.save(commit=False)
+            nueva_visita.paciente = paciente
+            # La hora_ingreso se pone automáticamente por el 'default' en models.py
+            nueva_visita.save()
+            messages.success(request, f'Visita de {nueva_visita.nombre_visitante} registrada exitosamente.')
+            return redirect('ver_paciente', id=paciente.id) # Redirige a la misma página
+        else:
+            messages.error(request, 'Error al registrar la visita. Revisa los datos.')
+            # Si hay error, el formulario inválido se pasará al contexto
+    
+    # --- Lógica para mostrar la página (GET) ---
+    # Creamos un formulario vacío para registrar nuevas visitas
+    visita_form = VisitaForm()
+    
+    # Obtenemos todas las visitas de este paciente, más recientes primero
+    lista_visitas = Visita.objects.filter(paciente=paciente).order_by('-hora_ingreso')
     
     context = {
-        'paciente': paciente
+        'paciente': paciente,
+        'visita_form': visita_form,     # El formulario para registrar
+        'lista_visitas': lista_visitas, # La lista de visitas pasadas
     }
-    # Necesitaremos crear este template 'ver_paciente.html' en el siguiente paso
     return render(request, 'gestion/ver_paciente.html', context)
 
 
@@ -173,6 +193,24 @@ def eliminar_paciente(request, id):
     
     # Redirigimos a la lista de pacientes
     return redirect('lista_pacientes')
+
+
+# --- ¡NUEVA FUNCIÓN! ---
+# REGISTRAR SALIDA DE VISITA
+@login_required
+def registrar_salida_visita(request, visita_id):
+    visita = get_object_or_404(Visita, id=visita_id)
+    
+    # Asegurarnos de que no se marque la salida dos veces
+    if visita.hora_salida is None:
+        visita.hora_salida = timezone.now()
+        visita.save()
+        messages.success(request, f'Salida de {visita.nombre_visitante} registrada.')
+    else:
+        messages.warning(request, 'Esta visita ya tenía una hora de salida registrada.')
+    
+    # Redirigir de vuelta a la página del paciente
+    return redirect('ver_paciente', id=visita.paciente.id)
 
 
 # EXPORTAR DATOS A JSON
