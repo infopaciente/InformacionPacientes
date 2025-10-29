@@ -230,6 +230,7 @@ def exportar_json(request):
     return response
 
 
+# EXPORTAR PDF (LISTA COMPLETA)
 @login_required
 def exportar_pdf(request):
     pacientes_list = Paciente.objects.all().order_by('area__nombre', 'nombre')
@@ -244,6 +245,35 @@ def exportar_pdf(request):
         return response
     return HttpResponse("Error al generar el PDF.", status=500)
 
+
+# --- ¡NUEVA FUNCIÓN PARA PDF INDIVIDUAL! ---
+@login_required
+def exportar_pdf_paciente(request, id):
+    # 1. Obtenemos el paciente
+    paciente = get_object_or_404(Paciente, id=id)
+    # 2. Obtenemos sus visitas
+    visitas = Visita.objects.filter(paciente=paciente).order_by('hora_ingreso')
+    
+    # 3. Definimos el contexto
+    context = {
+        'paciente': paciente,
+        'visitas': visitas
+    }
+    
+    # 4. Llamamos a la función de utilidad con el NUEVO MOLDE
+    pdf = render_to_pdf('gestion/pdf_paciente_individual.html', context)
+    
+    if pdf:
+        # 5. Creamos un nombre de archivo dinámico
+        filename = f"ficha_paciente_{paciente.dni}_{paciente.apellido}.pdf"
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+    
+    return HttpResponse("Error al generar el PDF.", status=500)
+
+
+# RESTABLECER DATOS
 @login_required
 def restablecer_datos(request):
     if request.method == 'POST':
