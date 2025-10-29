@@ -1,0 +1,34 @@
+# render.yaml
+# Render Blueprint para tu aplicación Django
+
+databases:
+  - name: infopacientedb
+    plan: free
+    databaseName: infopaciente_db
+    user: infopaciente_user
+
+services:
+  - type: web
+    name: app-infopaciente-web
+    env: python
+    region: oregon # Debe coincidir con la región de tu base de datos
+    plan: free
+    
+    # CLAVE 1: Directorio Raíz para encontrar los archivos
+    rootDir: InformacionPacientes/informacionPacientes 
+
+    # CLAVE 2: Comandos de Construcción y Arranque
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn InformacionPacientes.wsgi"
+
+    # CLAVE 3: Variables de Entorno
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: infopacientedb
+          property: connectionString
+      - key: WEB_CONCURRENCY
+        value: 4 # Número de workers
+      
+      # Variables para crear el Superusuario (necesitas añadirlas en el Dashboard después)
+      # Aquí no se pueden poner los valores secretos, Render los pondrá por ti.
