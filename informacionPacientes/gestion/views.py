@@ -18,6 +18,7 @@ from django.shortcuts import redirect
 # Usamos el decorador para proteger esta vista
 @login_required 
 def dashboard(request):
+ 
     # Datos que ya tenías
     total_pacientes = Paciente.objects.count()
     pacientes_recientes = Paciente.objects.order_by('-fecha_ingreso')[:5]
@@ -74,36 +75,38 @@ def registrar_paciente(request):
 # LISTAR PACIENTES
 @login_required
 def lista_pacientes(request):
-    
-    # 1. Obtenemos el término de búsqueda de la URL (ej: ?q=Juan)
-    query = request.GET.get('q')
-    
-    # 2. Empezamos con todos los pacientes
-    pacientes_list = Paciente.objects.all()
-    
-    # 3. Si hay un término de búsqueda, filtramos
-    if query:
-        # Usamos Q() para buscar en múltiples campos (OR)
-        # __icontains = "contiene" (ignora mayúsculas/minúsculas)
-        pacientes_list = pacientes_list.filter(
-            Q(nhc__icontains=query) | 
-            Q(nombre__icontains=query)
-        )
-    
-    # 4. Ordenamos el resultado
-    pacientes_list = pacientes_list.order_by('nombre')
+    # Esta vista ahora solo muestra TODOS los pacientes.
+    # La búsqueda se maneja en 'buscar_paciente_dni'
+    pacientes_list = Paciente.objects.all().order_by('nombre')
     
     context = {
-        'pacientes_list': pacientes_list,
-        'query': query  # Pasamos el término de búsqueda de vuelta al template
+        'pacientes': pacientes_list, # El template espera 'pacientes'
     }
     return render(request, 'gestion/lista_pacientes.html', context)
 
-# BUSCAR PACIENTE
+# BUSCAR PACIENTE (MODIFICADA para DNI)
 @login_required
-def buscar_paciente(request):
-    # Esta vista solo muestra el template con el formulario de búsqueda
-    return render(request, 'gestion/buscar_paciente.html')
+def buscar_paciente_dni(request):
+    # Esta es la vista que usa el formulario de búsqueda
+    dni_query = request.GET.get('dni')
+    pacientes_encontrados = Paciente.objects.none() # Lista vacía por defecto
+
+    if dni_query:
+        # Buscamos pacientes que contengan el DNI
+        # Usamos 'dni' porque así se llama el 'name' en el input del HTML
+        pacientes_encontrados = Paciente.objects.filter(dni__icontains=dni_query)
+        if not pacientes_encontrados.exists():
+            messages.info(request, f'No se encontraron pacientes con el DNI: {dni_query}')
+    else:
+        messages.error(request, 'Por favor ingrese un DNI para buscar.')
+
+    context = {
+        'pacientes': pacientes_encontrados, # El template itera sobre 'pacientes'
+        'query': dni_query
+    }
+    # Reutilizamos el mismo template de la lista
+    return render(request, 'gestion/lista_pacientes.html', context)
+
 
 # CROQUIS DEL HOSPITAL
 @login_required
@@ -111,11 +114,70 @@ def croquis_hospital(request):
     # Esta vista solo renderiza el template del croquis
     return render(request, 'gestion/croquis_hospital.html')
 
+
+# --- ¡NUEVA FUNCIÓN! ---
+# VER PACIENTE
+@login_required
+def ver_paciente(request, id):
+    paciente = get_object_or_404(Paciente, id=id)
+    
+    # Aquí, más adelante, agregaremos la lógica para el historial de visitas
+    # Por ahora, solo mostramos la información del paciente
+    
+    context = {
+        'paciente': paciente
+    }
+    # Necesitaremos crear este template 'ver_paciente.html' en el siguiente paso
+    return render(request, 'gestion/ver_paciente.html', context)
+
+
+# EDITAR PACIENTE (Tu función original, ligeramente ajustada)
+@login_required
+def editar_paciente(request, id): # Cambié 'pk' por 'id' para consistencia
+    # 1. Obtenemos el paciente específico, o mostramos un error 404 si no existe
+    paciente = get_object_or_404(Paciente, id=id) # Usamos id
+    
+    if request.method == 'POST':
+        # 2. Si se envía el formulario (POST), lo procesamos
+        form = PacienteForm(request.POST, instance=paciente)
+        if form.is_valid():
+            form.save() # Guarda los cambios
+            messages.success(request, '¡Paciente actualizado exitosamente!')
+            return redirect('lista_pacientes') # Redirige de vuelta a la lista
+        else:
+            messages.error(request, 'Por favor corrige los errores en el formulario.')
+    else:
+        # 3. Si es GET, mostramos el formulario con los datos del paciente
+        form = PacienteForm(instance=paciente)
+
+    context = {
+        'form': form,
+        'paciente': paciente # Pasamos el paciente para mostrar su nombre si es necesario
+    }
+    # Tu template 'editar_paciente.html'
+    return render(request, 'gestion/editar_paciente.html', context)
+
+
+# --- ¡NUEVA FUNCIÓN! ---
+# ELIMINAR PACIENTE
+@login_required
+def eliminar_paciente(request, id):
+    paciente = get_object_or_404(Paciente, id=id)
+    try:
+        # Guardamos el nombre antes de borrarlo para el mensaje
+        nombre_completo = f'{paciente.nombre} {paciente.apellido}'
+        paciente.delete()
+        messages.success(request, f'Paciente {nombre_completo} (DNI: {paciente.dni}) ha sido eliminado exitosamente.')
+    except Exception as e:
+        messages.error(request, f'Ocurrió un error al intentar eliminar al paciente: {e}')
+    
+    # Redirigimos a la lista de pacientes
+    return redirect('lista_pacientes')
+
+
 # EXPORTAR DATOS A JSON
 @login_required
 def exportar_json(request):
-    # 1. Obtenemos los datos. Usamos .values() para obtener diccionarios
-    # Incluimos 'area__nombre' para obtener el *nombre* de la especialidad, no su ID.
     pacientes_queryset = Paciente.objects.all().values(
         'nhc', 
         'nombre', 
@@ -124,95 +186,41 @@ def exportar_json(request):
         'estado', 
         'fecha_ingreso'
     )
-    
-    # 2. Convertimos el QuerySet a una lista estándar
     pacientes_lista = list(pacientes_queryset)
-    
-    # 3. Creamos la respuesta JSON
-    # safe=False es necesario para permitir que la respuesta sea una lista.
     response = JsonResponse(pacientes_lista, safe=False)
-    
-    # 4. Añadimos el encabezado para forzar la descarga
     response['Content-Disposition'] = 'attachment; filename="pacientes.json"'
-    
     return response
-
 
 
 @login_required
 def exportar_pdf(request):
-    # 1. Obtenemos los datos (toda la lista de pacientes)
-    # Ordenamos por especialidad para que el reporte sea lógico
     pacientes_list = Paciente.objects.all().order_by('area__nombre', 'nombre')
-    
-    # 2. Definimos el contexto que usará el template
     context = {
         'pacientes_list': pacientes_list
     }
-    
-    # 3. Llamamos a nuestra función de utilidad
     pdf = render_to_pdf('gestion/pdf_pacientes_template.html', context)
-    
-    # 4. Forzamos la descarga con un nombre de archivo dinámico
     if pdf:
-        # Generamos un nombre de archivo con la fecha
         filename = f"reporte_pacientes_{datetime.date.today().strftime('%Y-%m-%d')}.pdf"
-        
-        # Creamos la respuesta
         response = HttpResponse(pdf, content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         return response
-    
-    # Si la función render_to_pdf falló
     return HttpResponse("Error al generar el PDF.", status=500)
 
 @login_required
 def restablecer_datos(request):
     if request.method == 'POST':
-        # 1. Si el usuario confirma (POST), borra los datos
         try:
             total_borrados, _ = Paciente.objects.all().delete()
             messages.success(request, f'¡Datos restablecidos! Se han borrado {total_borrados} pacientes.')
         except Exception as e:
             messages.error(request, f'Ocurrió un error al borrar los datos: {e}')
-        
-        # 2. Redirige al dashboard
         return redirect('dashboard')
     
-    # 3. Si es GET, solo muestra la página de confirmación
-    # Contamos cuántos pacientes se van a borrar
     conteo_pacientes = Paciente.objects.count()
     context = {
         'conteo_pacientes': conteo_pacientes
     }
     return render(request, 'gestion/restablecer_confirmar.html', context)
-
-
-@login_required
-def editar_paciente(request, pk):
-    # 1. Obtenemos el paciente específico, o mostramos un error 404 si no existe
-    paciente = get_object_or_404(Paciente, pk=pk)
-    
-    if request.method == 'POST':
-        # 2. Si se envía el formulario (POST), lo procesamos
-        # Le pasamos 'instance=paciente' para que sepa qué paciente actualizar
-        form = PacienteForm(request.POST, instance=paciente)
-        if form.is_valid():
-            form.save() # Guarda los cambios en el paciente existente
-            messages.success(request, '¡Paciente actualizado exitosamente!')
-            return redirect('lista_pacientes') # Redirige de vuelta a la lista
-        else:
-            messages.error(request, 'Por favor corrige los errores en el formulario.')
-    else:
-        # 3. Si es GET, mostramos el formulario con los datos del paciente
-        # 'instance=paciente' llena el formulario con los datos actuales
-        form = PacienteForm(instance=paciente)
-
-    context = {
-        'form': form
-    }
-    # Reutilizaremos un template, puedes crear uno nuevo si prefieres
-    return render(request, 'gestion/editar_paciente.html', context)
 
 
 def logout_view(request):
