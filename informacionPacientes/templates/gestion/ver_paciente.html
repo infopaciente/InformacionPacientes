@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Ficha del Paciente</h4>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">{{ paciente.nombre }} {{ paciente.apellido }}</h5>
+            <hr>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong><i class="fas fa-id-card"></i> DNI:</strong> {{ paciente.dni }}</p>
+                    <p><strong><i class="fas fa-birthday-cake"></i> Edad:</strong> {{ paciente.edad }} años</p>
+                    <p><strong><i class="fas fa-history"></i> N° Historia Clínica (NHC):</strong> {{ paciente.nhc }}</p>
+                    <p><strong><i class="fas fa-user-md"></i> Doctor Asignado:</strong> {{ paciente.doctor_asignado|default:"No asignado" }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong><i class="fas fa-building"></i> Área:</strong> {{ paciente.area.nombre }}</p>
+                    <p><strong><i class="fas fa-calendar-alt"></i> Fecha de Ingreso:</strong> {{ paciente.fecha_ingreso }}</p>
+                    <p><strong><i class="fas fa-clipboard-list"></i> Estado:</strong> {{ paciente.get_estado_display }}</p>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <h5>Historial de Visitas</h5>
+                <hr>
+                <p><em>(Aquí se mostrará el historial de visitas del paciente.)</em></p>
+                </div>
+
+            <hr>
+            <a href="{% url 'lista_pacientes' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver a la Lista
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
