@@ -1,6 +1,6 @@
 # gestion/forms.py
 from django import forms
-from .models import Paciente
+from .models import Paciente, Visita # --- MODIFICADO: Importamos el modelo Visita ---
 
 class PacienteForm(forms.ModelForm):
     
@@ -59,3 +59,24 @@ class PacienteForm(forms.ModelForm):
             'estado': forms.Select(attrs={'class': 'form-select'}),
             'doctor_asignado': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Dr. Juan Pérez'}),
         }
+
+# --- ¡NUEVO FORMULARIO DE VISITAS! ---
+
+class VisitaForm(forms.ModelForm):
+    class Meta:
+        model = Visita
+        # Campos que el visitante rellenará
+        fields = ['nombre_visitante', 'dni_visitante'] 
+        
+        labels = {
+            'nombre_visitante': 'Nombre Completo del Visitante',
+            'dni_visitante': 'DNI del Visitante',
+        }
+        
+        widgets = {
+            'nombre_visitante': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese nombre y apellidos'}),
+            'dni_visitante': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese DNI'}),
+        }
+        
+    # Nota: Los campos 'paciente', 'hora_ingreso' y 'hora_salida' 
+    # se manejarán automáticamente en el "cerebro" (views.py)
