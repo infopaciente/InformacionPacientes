@@ -22,12 +22,13 @@ urlpatterns = [
     # --- URL PARA VISITAS ---
     path('visitas/salida/<int:visita_id>/', views.registrar_salida_visita, name='registrar_salida_visita'),
 
-    # URLs de exportación y restablecimiento
+    # --- URLs de exportación y restablecimiento ---
     path('exportar/json/', views.exportar_json, name='exportar_json'),
     path('exportar/pdf/', views.exportar_pdf, name='exportar_pdf'),
-    
-    # --- ¡NUEVA URL PARA PDF INDIVIDUAL! ---
     path('pacientes/pdf/<int:id>/', views.exportar_pdf_paciente, name='exportar_pdf_paciente'),
+    
+    # --- ¡NUEVA URL PARA EXCEL! ---
+    path('exportar/excel/', views.exportar_excel, name='exportar_excel'),
     
     path('restablecer/', views.restablecer_datos, name='restablecer_datos'),
 ]
