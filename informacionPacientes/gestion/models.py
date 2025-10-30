@@ -1,7 +1,7 @@
 # gestion/models.py
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth.models import User # Necesario para el doctor
+from django.contrib.auth.models import User # Importamos User por si es necesario, aunque no se usa directamente aquí
 
 class Especialidad(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
@@ -20,19 +20,19 @@ class Paciente(models.Model):
 
     nhc = models.CharField(max_length=20, unique=True, verbose_name="NHC")
     
-    # --- CAMBIO IMPORTANTE ---
-    # Separamos nombre y apellido para que coincida con tu lógica
-    nombre = models.CharField(max_length=100)
-    apellido = models.CharField(max_length=100) 
+    # --- CAMBIOS CORREGIDOS (Añadido default='S/N') ---
+    # Al añadir 'default', Django no pregunta y resuelve la migración automáticamente.
+    nombre = models.CharField(max_length=100, default='Sin Nombre')
+    apellido = models.CharField(max_length=100, default='S/N') # CORREGIDO: Añadido default
     
     edad = models.PositiveIntegerField()
     area = models.ForeignKey(Especialidad, on_delete=models.PROTECT, related_name="pacientes")
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='Estable')
     fecha_ingreso = models.DateField(default=timezone.now)
 
-    # --- CAMPOS NUEVOS DE TU LISTA ---
+    # --- CAMPOS NUEVOS DE TU LISTA (Añadido default al doctor) ---
     # 1. Doctor Asignado
-    doctor_asignado = models.CharField(max_length=255, blank=True, null=True, verbose_name="Doctor Asignado")
+    doctor_asignado = models.CharField(max_length=255, blank=True, null=True, verbose_name="Doctor Asignado", default='No Asignado') # CORREGIDO: Añadido default
     
     # 2. Diagnóstico (Oculto)
     diagnostico = models.TextField(blank=True, null=True, verbose_name="Diagnóstico")
@@ -49,7 +49,6 @@ class Paciente(models.Model):
 
 class Visita(models.Model):
     # El paciente que está siendo visitado.
-    # Si se borra el paciente, se borran sus visitas (models.CASCADE)
     paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, related_name="visitas")
     
     # Información del visitante
