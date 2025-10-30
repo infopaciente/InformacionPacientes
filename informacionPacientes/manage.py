@@ -6,9 +6,8 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    # ¡CORRECCIÓN CLAVE AQUÍ!
-    # Apuntamos al nuevo nombre de la carpeta de configuración: 'core'
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
+    # Apunta al nombre original del proyecto Django
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'InformacionPacientes.settings') 
     
     try:
         from django.core.management import execute_from_command_line
