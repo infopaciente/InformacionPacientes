@@ -12,7 +12,14 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+import sys # Importado para corrección de ruta
 import dj_database_url
+
+# FIX: Añadir la ruta del proyecto a PYTHONPATH para que el servidor encuentre módulos anidados
+# Esto anula la confusión de mayúsculas y minúsculas en Render/Linux.
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(PROJECT_ROOT, os.pardir))
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -60,7 +67,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'informacionPacientes.urls'
+# CORRECCIÓN DE RUTA (Minúsculas para evitar ModuleNotFoundError en Render)
+ROOT_URLCONF = 'informacionPacientes.urls' 
 
 TEMPLATES = [
     {
@@ -77,6 +85,7 @@ TEMPLATES = [
     },
 ]
 
+# CORRECCIÓN DE RUTA (Minúsculas para evitar ModuleNotFoundError en Render)
 WSGI_APPLICATION = 'informacionPacientes.wsgi.application'
 
 
